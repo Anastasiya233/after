@@ -9,11 +9,12 @@ import 'package:wts_task/features/auth/presentation/view/otp_screen.dart';
 import 'package:wts_task/features/auth/presentation/view/phone_auth_screen.dart';
 import 'package:wts_task/features/cart/presentation/view/screens/cart_screen.dart';
 import 'package:wts_task/features/cart/presentation/view/screens/checkout_screen.dart';
-import 'package:wts_task/features/catalog/presentation/view/add_review_screen.dart';
+import 'package:wts_task/features/product/presentation/view/add_review_screen.dart';
 import 'package:wts_task/features/catalog/presentation/view/catalog_screen.dart';
-import 'package:wts_task/features/catalog/presentation/view/product_detail_screen.dart';
-import 'package:wts_task/features/catalog/presentation/view/product_list_screen.dart';
-import 'package:wts_task/features/catalog/presentation/view/product_reviews_screen.dart';
+import 'package:wts_task/features/product/presentation/view/product_detail_screen.dart';
+import 'package:wts_task/features/product/presentation/view/product_list_screen.dart';
+import 'package:wts_task/features/catalog/presentation/view/sub_catalog_screen.dart';
+import 'package:wts_task/features/product/presentation/view/product_reviews_screen.dart';
 import 'package:wts_task/features/chat/presentation/view/support_chat_screen.dart';
 import 'package:wts_task/features/profile/presentation/view/screens/edit_profile_screen.dart';
 import 'package:wts_task/features/profile/presentation/view/screens/order_detail_screen.dart';
@@ -61,23 +62,37 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: '/catalog',
-                builder: (context, state) => const CatalogScreen(),
+                builder: (context, state) {
+                  return CatalogScreen();
+                },
                 routes: [
                   GoRoute(
-                    path: 'category/:categoryId',
-                    builder: (context, state) => const ProductListScreen(),
+                    path: 'category',
+                    builder: (context, state) {
+                      final categoryId = state.extra as String;
+
+                      return SubCatalogScreen(
+                        categoryId: categoryId,
+                        catalogName: 'asd',
+                      );
+                    },
                     routes: [
                       GoRoute(
-                        path: 'product/:productId',
-                        builder: (context, state) => const ProductDetailScreen(),
+                        path: 'products',
+                        builder: (context, state) {
+                          final categoryId = state.extra as String;
+                          return ProductListScreen(categoryId: categoryId);
+                        },
                         routes: [
                           GoRoute(
                             path: 'reviews',
-                            builder: (context, state) => const ProductReviewsScreen(),
+                            builder: (context, state) =>
+                                const ProductReviewsScreen(),
                             routes: [
                               GoRoute(
                                 path: 'add',
-                                builder: (context, state) => const AddReviewScreen(),
+                                builder: (context, state) =>
+                                    const AddReviewScreen(),
                               ),
                             ],
                           ),
