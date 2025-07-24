@@ -2,6 +2,7 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+
 import 'package:wts_task/app/bottom_nav_bar.dart';
 import 'package:wts_task/core/models/app_user.dart';
 import 'package:wts_task/features/auth/data/datasource/auth_local_data_source.dart';
@@ -11,7 +12,6 @@ import 'package:wts_task/features/cart/presentation/view/screens/cart_screen.dar
 import 'package:wts_task/features/cart/presentation/view/screens/checkout_screen.dart';
 import 'package:wts_task/features/product/presentation/view/add_review_screen.dart';
 import 'package:wts_task/features/catalog/presentation/view/catalog_screen.dart';
-import 'package:wts_task/features/product/presentation/view/product_detail_screen.dart';
 import 'package:wts_task/features/product/presentation/view/product_list_screen.dart';
 import 'package:wts_task/features/catalog/presentation/view/sub_catalog_screen.dart';
 import 'package:wts_task/features/product/presentation/view/product_reviews_screen.dart';
@@ -30,16 +30,23 @@ extension GoRouterExtension on BuildContext {
   }
 }
 
+// Ключи
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> _catalogBranchKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> _cartBranchKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> _profileBranchKey = GlobalKey<NavigatorState>();
+
 class AppRouter {
   AppRouter(this.appUser);
 
   final AppUser appUser;
 
   late final GoRouter appRouter = GoRouter(
+    navigatorKey: _rootNavigatorKey,
     initialLocation: '/catalog',
     observers: [BotToastNavigatorObserver()],
     routes: [
-      //Авторизация
+      // Авторизация
       GoRoute(
         path: '/auth/phone',
         builder: (context, state) => const PhoneAuthScreen(),
@@ -52,47 +59,60 @@ class AppRouter {
         },
       ),
 
-      //Главный интерфейс
+      // Основной интерфейс
       StatefulShellRoute.indexedStack(
+        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state, navigationShell) {
           return AppBottomNavBar(navigationShell: navigationShell);
         },
         branches: [
+          // Каталог
           StatefulShellBranch(
+            navigatorKey: _catalogBranchKey,
             routes: [
               GoRoute(
                 path: '/catalog',
-                builder: (context, state) {
-                  return CatalogScreen();
-                },
+                builder: (context, state) => CatalogScreen(),
                 routes: [
                   GoRoute(
                     path: 'category',
                     builder: (context, state) {
-                      final categoryId = state.extra as String;
+                      final categoryId = state.uri.queryParameters['categoryId'];
+                      final catalogName = state.uri.queryParameters['catalogName'];
+
+                      if (categoryId == null || catalogName == null) {
+                        throw Exception("Missing query parameters");
+                      }
 
                       return SubCatalogScreen(
                         categoryId: categoryId,
-                        catalogName: 'asd',
+                        catalogName: catalogName,
                       );
                     },
                     routes: [
                       GoRoute(
                         path: 'products',
                         builder: (context, state) {
-                          final categoryId = state.extra as String;
-                          return ProductListScreen(categoryId: categoryId);
+                          final categoryId = state.uri.queryParameters['categoryId'];
+                          final catalogName = state.uri.queryParameters['catalogName'];
+
+                          if (categoryId == null || catalogName == null) {
+                            throw Exception("Missing query parameters");
+                          }
+
+                          return ProductListScreen(
+                            categoryId: categoryId,
+                            catalogName: catalogName,
+                          );
                         },
                         routes: [
                           GoRoute(
                             path: 'reviews',
-                            builder: (context, state) =>
-                                const ProductReviewsScreen(),
+                            builder: (context, state) => const ProductReviewsScreen(),
                             routes: [
                               GoRoute(
                                 path: 'add',
-                                builder: (context, state) =>
-                                    const AddReviewScreen(),
+                                builder: (context, state) => const AddReviewScreen(),
                               ),
                             ],
                           ),
@@ -107,6 +127,7 @@ class AppRouter {
 
           // Корзина
           StatefulShellBranch(
+            navigatorKey: _cartBranchKey,
             routes: [
               GoRoute(
                 path: '/cart',
@@ -122,8 +143,9 @@ class AppRouter {
             ],
           ),
 
-          //Профиль
+          // Профиль
           StatefulShellBranch(
+            navigatorKey: _profileBranchKey,
             routes: [
               GoRoute(
                 path: '/profile',
@@ -151,7 +173,8 @@ class AppRouter {
           ),
         ],
       ),
-      //Поддержка
+
+      // Поддержка
       GoRoute(
         path: '/support',
         builder: (context, state) => const SupportChatScreen(),
@@ -161,10 +184,12 @@ class AppRouter {
     redirect: (BuildContext context, GoRouterState state) async {
       final path = state.uri.path;
       final userSource = context.read<AuthLocalDataSource>();
+
       if (!await userSource.isAuthenticated() && !path.startsWith('/auth')) {
         return '/auth/phone';
       }
-      return state.fullPath;
+
+      return null;
     },
   );
 }

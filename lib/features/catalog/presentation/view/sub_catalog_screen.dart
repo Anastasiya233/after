@@ -1,18 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:wts_task/core/page/base_list_view_page_state.dart';
 import 'package:wts_task/core/page/base_page.dart';
-import 'package:wts_task/features/product/presentation/view/product_list_screen.dart';
-
 import 'package:wts_task/features/catalog/presentation/view_models/catalog_view_model.dart';
+import 'package:wts_task/features/product/presentation/view/product_list_screen.dart';
 
 class SubCatalogScreen extends BasePage {
   const SubCatalogScreen({
     required this.categoryId,
     required this.catalogName,
     super.key,
-  });
+  }) : super(title: catalogName);
   final String catalogName;
   final String categoryId;
 
@@ -33,13 +31,29 @@ class _SubCatalogScreenState
 
     return GestureDetector(
       onTap: () {
+        final categoryId = item.categoryId.toString();
+        final catalogName = item.title;
+
         if (item.hasSubcategories == 0) {
-          context.push(
-            "/catalog/category/products",
-            extra: item.categoryId.toString(),
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProductListScreen(
+                categoryId: categoryId,
+                catalogName: catalogName,
+              ),
+            ),
           );
         } else {
-          context.push("/catalog/category", extra: item.categoryId.toString());
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SubCatalogScreen(
+                categoryId: categoryId,
+                catalogName: catalogName,
+              ),
+            ),
+          );
         }
       },
       child: Card(

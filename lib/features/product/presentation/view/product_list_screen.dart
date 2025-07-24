@@ -1,16 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:wts_task/core/constants/constants.dart';
 import 'package:wts_task/core/page/base_grid_view_page_state.dart';
 import 'package:wts_task/core/page/base_page.dart';
 import 'package:wts_task/features/product/presentation/view_model/product_view_model.dart';
 
 class ProductListScreen extends BasePage {
-  final String categoryId;
   const ProductListScreen({
-    super.key,
-    super.title = 'Каталог',
     required this.categoryId,
-  });
+    required this.catalogName,
+    super.key,
+  }) : super(title: catalogName);
+  final String categoryId;
+  final String catalogName;
 
   @override
   State<ProductListScreen> createState() => _ProductListScreenState();
@@ -18,7 +20,7 @@ class ProductListScreen extends BasePage {
 
 class _ProductListScreenState
     extends BaseGridViewPageState<ProductListScreen, ProductViewModel> {
-  static GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+  static final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   ProductViewModel createModel() =>
       ProductViewModel(categoryId: widget.categoryId);
@@ -27,7 +29,7 @@ class _ProductListScreenState
   final FocusNode _searchFocusNode = FocusNode();
 
   @override
-  bool get shouldBuildEmptyListPlaceholder => false;
+  bool get shouldBuildEmptyListPlaceholder => true;
 
   @override
   void dispose() {
@@ -37,21 +39,54 @@ class _ProductListScreenState
   }
 
   @override
+  Widget buildEmptyListPlaceholder(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          TextField(
+            key: _formKey,
+            controller: _searchController,
+            focusNode: _searchFocusNode,
+            decoration: InputDecoration(
+              hintText: 'Поиск товаров',
+              prefixIcon: Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onChanged: (text) {
+              model.setSearchString(text);
+            },
+          ),
+          const Expanded(child: Center(child: Text("Нет данных"))),
+        ],
+      ),
+    );
+  }
+
+  @override
   Widget? buildSliverHeader(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: TextField(
-        key: _formKey,
-        controller: _searchController,
-        focusNode: _searchFocusNode,
-        decoration: InputDecoration(
-          hintText: 'Поиск товаров',
-          prefixIcon: Icon(Icons.search),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        onChanged: (text) {
-          model.setSearchString(text);
-        },
+      child: Column(
+        children: [
+          TextField(
+            key: _formKey,
+            controller: _searchController,
+            focusNode: _searchFocusNode,
+            decoration: InputDecoration(
+              hintText: 'Поиск товаров',
+              prefixIcon: Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onChanged: (text) {
+              model.setSearchString(text);
+            },
+          ),
+        ],
       ),
     );
   }
@@ -78,7 +113,7 @@ class _ProductListScreenState
                 child: CachedNetworkImage(
                   width: 64,
                   height: 64,
-                  imageUrl: item.imageUrl ?? "",
+                  imageUrl: item.imageUrl ?? Constants.placeholderImageUrl,
                   progressIndicatorBuilder: (context, url, progress) {
                     return Center(
                       child: SizedBox(

@@ -27,8 +27,6 @@ class ApiResponseParser {
           baseApiResponse: response,
         );
       }
-      print('jsonData type: ${jsonData.runtimeType}');
-      print('jsonData contents: $jsonData');
       final list = (jsonData as List<dynamic>).map((e) {
         if (e is Map<String, dynamic>) {
           return fromJson(e);

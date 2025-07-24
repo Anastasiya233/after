@@ -3,13 +3,12 @@ import 'package:wts_task/features/product/data/repositories/product_repository.d
 import 'package:wts_task/features/product/data/models/product_model.dart';
 
 class ProductViewModel extends ListModel<ProductModel> {
-  ProductViewModel({super.items, this.categoryId});
-  final String? categoryId;
+  ProductViewModel({required this.categoryId, super.items});
+  final String categoryId;
   final ProductRepository _productRepository = ProductRepository();
 
   @override
   Future<void> loadNextItems(String? loadingUuid) async {
-    print("product $categoryId");
     final response = await _productRepository.getProductList(
       categoryId: categoryId,
     );

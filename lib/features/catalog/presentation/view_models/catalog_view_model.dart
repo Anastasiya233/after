@@ -9,7 +9,6 @@ class CatalogViewModel extends ListModel<CatalogResponse> {
 
   @override
   Future<void> loadNextItems(String? loadingUuid) async {
-    print("asdasd $categoryId");
     final response = await _catalogRepository.getCatalogList(categoryId);
     if (response.isError) {
       addError(response.error);

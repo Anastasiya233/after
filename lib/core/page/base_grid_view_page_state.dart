@@ -227,8 +227,6 @@ abstract class BaseGridViewPageState<
     return fixedFooter ?? const SizedBox.shrink();
   }
 
-
-
   @override
   bool get shouldBuildEmptyListPlaceholder => !hasGridHeader && !hasGridFooter;
 

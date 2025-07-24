@@ -1,3 +1,4 @@
+import 'package:wts_task/core/constants/constants.dart';
 import 'package:wts_task/core/entities/api_response.dart';
 import 'package:wts_task/core/services/api/api_response_parser.dart';
 import 'package:wts_task/core/services/api/dio_network_service.dart';
@@ -12,12 +13,10 @@ class CatalogRepository extends DioNetworkService {
     final response = await get(
       '/category/list',
       queryParameters: {
-        "accessToken": "CaIqP7H-gEhJJD4_gu4imh-_ZpV_wFeh",
+        "accessToken": Constants.accsessToken,
         "parentId": categoryId,
       },
     );
-    print(response.rawData);
-    print(response.dataJson);
     return ApiResponseParser.parseListFromResponse(
       response,
       fromJson: CatalogResponse.fromJson,

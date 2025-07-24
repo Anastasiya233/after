@@ -1,13 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:wts_task/core/constants/constants.dart';
 import 'package:wts_task/core/page/base_list_view_page_state.dart';
 import 'package:wts_task/core/page/base_page.dart';
-import 'package:wts_task/features/catalog/data/model/catalog_model.dart';
-import 'package:wts_task/features/product/presentation/view/product_list_screen.dart';
 import 'package:wts_task/features/catalog/presentation/view/sub_catalog_screen.dart';
 import 'package:wts_task/features/catalog/presentation/view_models/catalog_view_model.dart';
+import 'package:wts_task/features/product/presentation/view/product_list_screen.dart';
 
 class CatalogScreen extends BasePage {
   const CatalogScreen({super.key, super.title = 'Каталог'});
@@ -20,7 +18,7 @@ class _CatalogScreenState
     extends BaseListViewPageState<CatalogScreen, CatalogViewModel> {
   @override
   CatalogViewModel createModel() =>
-      CatalogViewModel(items: [allProductCategory]);
+      CatalogViewModel(items: [Constants.allProductCategory]);
 
   @override
   Widget buildListItemImpl(BuildContext context, int index) {
@@ -29,13 +27,29 @@ class _CatalogScreenState
 
     return GestureDetector(
       onTap: () {
+        final categoryId = item.categoryId.toString();
+        final catalogName = item.title;
+
         if (item.hasSubcategories == 0) {
-          context.push(
-            "/catalog/category/products",
-            extra: item.categoryId.toString(),
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProductListScreen(
+                categoryId: categoryId,
+                catalogName: catalogName,
+              ),
+            ),
           );
         } else {
-          context.push("/catalog/category", extra: item.categoryId.toString());
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SubCatalogScreen(
+                categoryId: categoryId,
+                catalogName: catalogName,
+              ),
+            ),
+          );
         }
       },
       child: Card(
